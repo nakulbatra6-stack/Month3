@@ -1,0 +1,49 @@
+#feature engineering
+df.columns = df.columns.get_level_values(0)
+# Moving Average (5-day & 10-day)
+df['MA5'] = df['Close'].rolling(window=5).mean()#Take last 5 days closing prices and compute average,short trend
+df['MA10'] = df['Close'].rolling(window=10).mean()#Take last 10 days closing prices and compute average,longer trend
+
+# Daily Returns
+df['Return'] = df['Close'].pct_change()#daily movement,relative to previous day's closing price (Current - Previous) / Previous day's closing price
+
+# Drop NaN values
+df = df.dropna()
+
+
+Creates a moving window (for calculations)
+| Row | Window (last 5 values) |
+| --- | ---------------------- |
+| 1   | ❌ not enough data      |
+| 2   | ❌                      |
+| 3   | ❌                      |
+| 4   | ❌                      |
+| 5   | ✅ rows 1–5             |
+| 6   | ✅ rows 2–6             |
+| 7   | ✅ rows 3–7             |
+
+This is why it's called rolling (sliding window)
+
+| Feature     | `head()`   | `rolling()`            |
+| ----------- | ---------- | ---------------------- |
+| Purpose     | View data  | Compute over window    |
+| Output      | First rows | New calculated values  |
+| Moves?      | ❌ No       | ✅ Yes (sliding)        |
+| Used in ML? | ❌ No       | ✅ YES (very important) |
+
+rolling why?? 
+To capture temporal patterns and trends in time-series data
+
+# “Will tomorrow’s price be higher than today’s?”
+# If YES → 1 (UP 📈)
+# If NO → 0 (DOWN 📉)
+
+df['Target'] = (df['Close'].shift(-1) > df['Close']).astype(int)
+shift(-1) = tomorrow’s price
+2nd comparison result
+| Today | Tomorrow | Result  |
+| ----- | -------- | ------- |
+| 100   | 105      | True ✅  |
+| 105   | 103      | False ❌ |
+Convert True/False → 1/0
+.astype(int)
